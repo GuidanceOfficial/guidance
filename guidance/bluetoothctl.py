@@ -81,10 +81,11 @@ class Bluetoothctl:
     def parse_device_info(self, info_string):
         """Parse a string corresponding to a device."""
         device = {}
-        block_list = [b"[\x1b[0;", b"removed"]
+        # block_list = [b"[\x1b[0;", b"removed"]
+        block_list = []
         print("Info String: ", info_string)
         string_valid = not any(keyword in info_string for keyword in block_list)
-
+        
         if string_valid:
             try:
                 device_position = info_string.index(b"Device")
