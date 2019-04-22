@@ -39,6 +39,18 @@ class Bluetoothctl:
         out = subprocess.check_output("rfkill unblock bluetooth", shell = True)
         self.child = pexpect.spawn("bluetoothctl", echo = False)
 
+    def setup(self):
+        """Run a sequence of commands to enable bluetooth communication."""
+        # power on, pairable on, discoverable on, agent on, default-agent, trust
+        cmds = ["power on", "pairable on", "discoverable on", "agent on", "default-agent"]
+        for cmd in cmds:
+            try:
+                out = self.get_output(cmd)
+            except BluetoothctlError as e:
+                print(e)
+                return None
+
+
     def get_output(self, command, pause = 0):
         """Run a command in bluetoothctl prompt, return output as a list of lines."""
         self.child.send(command + "\n")
@@ -255,6 +267,7 @@ if __name__ == "__main__":
 
     print("Init bluetooth...")
     bl = Bluetoothctl()
+    bl.setup()
     print("Ready!")
     bl.start_scan()
     print("Scanning for 10 seconds...")
