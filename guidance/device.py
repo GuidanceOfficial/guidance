@@ -1,7 +1,6 @@
 import sys
 
-from abc import ABC, abstractmethod
-
+from .bluetoothctl import Bluetoothctl
 from bluetooth import *
 
 
@@ -32,14 +31,14 @@ class Device:
 
 
     def listen(self):
-        print(f"Waiting for connection on port {self.port_num}")
+        print("Waiting for connection on port {}".format(self.port_num))
         client_sock, client_info = self.server_sock.accept()
-        print(f"Accepted connection from {client_info}")
+        print("Accepted connection from {}".format(client_info))
         try:
             while True:
                 data = client_sock.recv(1024)
                 if len(data) == 0: break
-                print(f"Received: [{data}]")
+                print("Received: [{}]".format(data))
         except IOError:
             pass
         client_sock.close()
@@ -67,6 +66,7 @@ class Device:
 
 
 if __name__ == "__main__":
+    ctl = Bluetoothctl()
     local = Device(8000)
     local.listen()
 
