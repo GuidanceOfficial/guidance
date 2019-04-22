@@ -8,5 +8,8 @@ These instructions will get you a copy of the project up and running on your loc
 ```
 ```
 ### Installing
+```
+sudo apt-get install libbluetooth-dev python-dev
+```
 ### Built With
 ### Acknowledgments
