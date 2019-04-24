@@ -3,6 +3,7 @@ Guidance is a navigation system used to provide users with a way of traveling fr
 
 ### To-Do
 * Add pybluez to requirements.txt
+* Add infrastructure diagram
 
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
