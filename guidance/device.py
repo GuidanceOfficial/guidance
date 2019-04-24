@@ -38,16 +38,16 @@ class Device:
     def listen(self):
         client_sock, client_info = self.server_sock.accept()
         return client_sock, client_info
-        print("Accepted connection from {}".format(client_info))
-        try:
-            while True:
-                data = client_sock.recv(1024)
-                if len(data) == 0: break
-                print("Received: [{}]".format(data))
-        except IOError:
-            pass
-        client_sock.close()
-        self.server_sock.close()
+        # print("Accepted connection from {}".format(client_info))
+        # try:
+        #     while True:
+        #         data = client_sock.recv(1024)
+        #         if len(data) == 0: break
+        #         print("Received: [{}]".format(data))
+        # except IOError:
+        #     pass
+        # client_sock.close()
+        # self.server_sock.close()
 
 
     def send(self, addr):
