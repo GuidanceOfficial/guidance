@@ -21,7 +21,7 @@ sudo apt-get install python-dev
 sudo apt-get install libbluetooth-dev
 ```
 
-Check the status of your bluetooth service. You should see the status as *active (running)*. Thus far, it has been safe to ignore the warning listed below
+Check the status of your bluetooth service. You should see the status as *active (running)*. Thus far, it has been safe to ignore the warning listed below when executing the command.
 ```
 sudo service bluetooth status
 ```
