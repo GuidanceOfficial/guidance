@@ -1,17 +1,22 @@
 import sys
 
-from .bluetoothctl import Bluetoothctl
 from bluetooth import *
 
 
 class Device:
-    def __init__(self, port_num):
+    def __init__(self, addr, port_num):
         self.port_num = port_num
         self.uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
         self._setup(port_num)
         self._broadcast_service()
+        self.addr = addr
+        self.active = True
     
 
+    def is_active(self):
+        return self.active
+    
+    
     def _setup(self, port_num):
         """Opens a port socket communication."""
         self.port_num = port_num
@@ -31,8 +36,8 @@ class Device:
 
 
     def listen(self):
-        print("Waiting for connection on port {}".format(self.port_num))
         client_sock, client_info = self.server_sock.accept()
+        return client_sock, client_info
         print("Accepted connection from {}".format(client_info))
         try:
             while True:
@@ -66,7 +71,6 @@ class Device:
 
 
 if __name__ == "__main__":
-    ctl = Bluetoothctl()
     local = Device(8000)
     local.listen()
 

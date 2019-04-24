@@ -38,8 +38,10 @@ class Bluetoothctl:
     def __init__(self):
         out = subprocess.check_output("rfkill unblock bluetooth", shell = True)
         self.child = pexpect.spawn("bluetoothctl", echo = False)
+        self._setup()
 
-    def setup(self):
+
+    def _setup(self):
         """Run a sequence of commands to enable bluetooth communication."""
         # power on, pairable on, discoverable on, agent on, default-agent, trust
         cmds = ["power on", "pairable on", "discoverable on", "agent on", "default-agent"]
@@ -51,6 +53,10 @@ class Bluetoothctl:
                 return None
 
 
+    def get_address(self):
+        return ""
+    
+    
     def get_output(self, command, pause = 0):
         """Run a command in bluetoothctl prompt, return output as a list of lines."""
         self.child.send(command + "\n")
@@ -85,7 +91,7 @@ class Bluetoothctl:
         block_list = []
         print("Info String: ", info_string)
         string_valid = not any(keyword in info_string for keyword in block_list)
-        
+
         if string_valid:
             try:
                 device_position = info_string.index(b"Device")
@@ -265,7 +271,6 @@ class Bluetoothctl:
             return None
 
 if __name__ == "__main__":
-
     print("Init bluetooth...")
     bl = Bluetoothctl()
     bl.setup()
