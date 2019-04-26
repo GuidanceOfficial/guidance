@@ -54,14 +54,16 @@ def receive_data(sock, data, default=True):
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    dummy_data_reader, cur_row = csv.reader("dummy_travel_data.csv"), 0
-    dummy_data = list(dummy_data_reader)
+    dummy_data_reader = csv.reader( open("dummy_travel_data.csv") )
+    dummy_data = list(dummy_data_reader)[1:] # Ignores header
+    cur_row = 0
     
     while device.is_active():
         print("Waiting for connection on port {}".format(BLUETOOTH_PORT))
         client_sock, client_info = device.accept()
         with client_sock:
             print("Accepted connection from {}".format(client_info))
+            device.connect(PI_ZERO_ADDRESS1)
             while True:
                 # data = client_sock.recv(PAYLOAD)
                 data = receive_data(client_sock, dummy_data[cur_row], False)
@@ -70,8 +72,7 @@ if __name__ == "__main__":
                 print("Data received: [{}]".format(data))
                 # Send data to next device
                 device.send(PI_ZERO_ADDRESS1, data)
-        except IOError:
-            pass
+            device.close_connection_to_peer()
         client_sock.close()
 
 

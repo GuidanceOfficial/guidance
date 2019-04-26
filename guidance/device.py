@@ -55,7 +55,7 @@ class Device:
         return find_service(uuid=self.uuid, address=addr)
 
 
-    def send(self, addr, payload):
+    def connect(self, addr):
         service_match = find_service(uuid=self.uuid, address=addr) # the UUID are the same for both devices at the moment
         
         if len(service_match) == 0:
@@ -67,13 +67,20 @@ class Device:
 
         sock = BluetoothSocket(RFCOMM)
         sock.connect((host, port))
+        self.peer_server_sock = sock
         # print("Connected. Type something:")
         # while True:
             # data = input()
             # if len(data) == 0:break
             # sock.send(data)
-        sock.sendall(payload)
-        sock.close()
+
+
+    def send(self, payload):
+        self.peer_server_sock.send(payload)
+
+
+    def close_connection_to_peer(self):
+        self.peer_server_sock.close()
 
 
 if __name__ == "__main__":

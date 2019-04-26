@@ -42,6 +42,19 @@ At this point, reboot your system so the device will recognize the changes.
 sudo shutdown -h now
 ```
 
+### Optional, but highly recommended
+You may encounter an error that says
+```bash
+_bluetooth.error: (13, 'Permission denied')
+```
+
+An easy, but not recommended, workaround is to run the script as the root user. We suggest the following. Make sure your pi user is in the bluetooth group.
+```
+cat /etc/group | grep bluetooth
+```
+
+If your device 
+
 ## Installing
 Clone the repository to your desired directory and cd into it.
 ```
