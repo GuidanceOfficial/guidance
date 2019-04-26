@@ -2,8 +2,10 @@
 Serves as the primary controller for setting up a device for bluetooth communication with
 neighboring devices.
 
-This file needs to be tailored
+This file needs to be tailored towards your device specific mac address
 """
+import csv
+
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
 from guidance.motor import Motor
@@ -13,9 +15,10 @@ from bluetooth import *
 MOTOR_PIN = 27
 BLUETOOTH_PORT = 1
 PAYLOAD = 1024
-END_TRANSMISSION = b"-1"
-PI_ZERO_ADDRESS1 = ""
-PI_ZERO_ADDRESS2 = ""
+END_TRANSMISSION = b""
+PI_ZERO_ADDRESS1 = "B8:27:EB:2D:D7:36"
+PI_ZERO_ADDRESS2 = "B8:27:EB:D2:45:EF"
+SLEEP_TIME = 5 # seconds
 
 
 def connect_to(addr):
@@ -38,22 +41,35 @@ def connect_to(addr):
         print("Connected to {}".format(addr))
 
 
+def receive_data(sock, data, default=True):
+    if default:
+        return sock.recv(PAYLOAD)
+    else:
+        from time import sleep
+        sleep(SLEEP_TIME)
+        return bytes("{},{}".format(data[0], data[1]), "utf-8")
+
 
 
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
+    dummy_data_reader, cur_row = csv.reader("dummy_travel_data.csv"), 0
+    dummy_data = list(dummy_data_reader)
     
     while device.is_active():
         print("Waiting for connection on port {}".format(BLUETOOTH_PORT))
-        client_sock, client_info = device.listen()
-        print("Accepted connection from {}".format(client_info))
-        try:
-            is_receiving_data = True
-            while is_receiving_data:
-                data = client_sock.recv(PAYLOAD)
-                is_receiving_data = data == END_TRANSMISSION
+        client_sock, client_info = device.accept()
+        with client_sock:
+            print("Accepted connection from {}".format(client_info))
+            while True:
+                # data = client_sock.recv(PAYLOAD)
+                data = receive_data(client_sock, dummy_data[cur_row], False)
+                cur_row += 1
+                if not data: break
                 print("Data received: [{}]".format(data))
+                # Send data to next device
+                device.send(PI_ZERO_ADDRESS1, data)
         except IOError:
             pass
         client_sock.close()

@@ -6,7 +6,7 @@ Guidance is a navigation system used to provide users with a way of traveling fr
 * Add infrastructure diagram
 
 ## Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Note: We use *dummy_data.py* for testing purposes to simulate the query of some API responding with the next direction and distance until then. Used SOLELY for testing purposes.
 
 ## Prerequisites
 Prior to running this application, ensure that you've followed the steps below to ensure that your distribution of Linux is properly configured.
