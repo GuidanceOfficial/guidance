@@ -46,7 +46,7 @@ def receive_data(sock, data, default=True):
         return sock.recv(PAYLOAD)
     else:
         from time import sleep
-        sleep(SLEEP_TIME)
+        # sleep(SLEEP_TIME)
         return bytes("{},{}".format(data[0], data[1]), "utf-8")
 
 
@@ -54,26 +54,31 @@ def receive_data(sock, data, default=True):
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    dummy_data_reader = csv.reader( open("dummy_travel_data.csv") )
-    dummy_data = list(dummy_data_reader)[1:] # Ignores header
-    cur_row = 0
+    dummy_data_reader, cur_row = csv.reader(open("dummy_travel_data.csv")), 0
+    dummy_data = list(dummy_data_reader)[1:]
     
     while device.is_active():
-        print("Waiting for connection on port {}".format(BLUETOOTH_PORT))
-        client_sock, client_info = device.accept()
-        with client_sock:
-            print("Accepted connection from {}".format(client_info))
+        # print("Waiting for connection on port {}".format(BLUETOOTH_PORT))
+        # client_sock, client_info = device.accept()
+        # with client_sock:
+        if True:
+            # print("Accepted connection from {}".format(client_info))
             device.connect(PI_ZERO_ADDRESS1)
             while True:
                 # data = client_sock.recv(PAYLOAD)
-                data = receive_data(client_sock, dummy_data[cur_row], False)
+                client_sock = None
+                try:
+                    data = receive_data(client_sock, dummy_data[cur_row], False)
+                except:
+                    data = b""
                 cur_row += 1
                 if not data: break
-                print("Data received: [{}]".format(data))
+                print("Data received to send: [{}]".format(data))
                 # Send data to next device
-                device.send(PI_ZERO_ADDRESS1, data)
+                device.send(data)
             device.close_connection_to_peer()
-        client_sock.close()
+        # client_sock.close()
+        break
 
 
 
