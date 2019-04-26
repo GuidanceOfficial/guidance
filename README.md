@@ -6,7 +6,7 @@ Guidance is a navigation system used to provide users with a way of traveling fr
 * Add infrastructure diagram
 
 ## Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Note: We use *dummy_data.py* for testing purposes to simulate the query of some API responding with the next direction and distance until then. Used SOLELY for testing purposes.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Note: We use `dummy_data.py` for testing purposes to simulate the query of some API responding with the next direction and distance until then. Used SOLELY for testing purposes.
 
 ## Prerequisites
 Prior to running this application, ensure that you've followed the steps below to ensure that your distribution of Linux is properly configured.
@@ -16,18 +16,18 @@ Using the command line interface, check that your devices bluetooth module is re
 hciconfig
 ```
 
-Afterwards, you will need the following packages in order for *pybluez* to properly compile on your system.
+Afterwards, you will need the following packages in order for `pybluez` to properly compile on your system.
 ```
 sudo apt-get install python-dev
 sudo apt-get install libbluetooth-dev
 ```
 
-Check the status of your bluetooth service. You should see the status as *active (running)*. Thus far, it has been safe to ignore the warning listed below when executing the command.
+Check the status of your bluetooth service. You should see the status as `active (running)`. Thus far, it has been safe to ignore the warning listed below when executing the command.
 ```
 sudo service bluetooth status
 ```
 
-From the previous command, right above active, you should see *loaded*. Take note of this path and modify the file at this location using your favorite text editor, vim!
+From the previous command, right above active, you should see `loaded`. Take note of this path and modify the file at this location using your favorite text editor, vim!
 ```
 vim /lib/systemd/system/bluetooth.service
 ```
