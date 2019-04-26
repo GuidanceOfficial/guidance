@@ -115,7 +115,8 @@ source activate <venv_name>/bin/activate
 ```
 
 At this point, we can install the required dependencies using pip.
-```
+```bash
+pip install -r requirements.txt
 ```
 
 ## Built With
