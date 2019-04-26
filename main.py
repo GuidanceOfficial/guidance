@@ -54,7 +54,7 @@ def receive_data(sock, data, default=True):
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    dummy_data_reader, cur_row = csv.reader(open("dummy_travel_data.csv")), 0
+    dummy_data_reader, cur_row = csv.reader(open("./data/dummy_travel_data.csv")), 0
     dummy_data = list(dummy_data_reader)[1:]
     
     while device.is_active():
