@@ -32,7 +32,7 @@ From the previous command, right above active, you should see *loaded*. Take not
 vim /lib/systemd/system/bluetooth.service
 ```
 
-Under *[Service]*, add the *-C* flag to the end of the *ExecStart* alias.
+Under `[Service]`, add the `-C` flag to the end of the `ExecStart` alias.
 ```
 ExecStart=/usr/lib/bluetooth/bluetoothd -C
 ```
@@ -42,18 +42,60 @@ At this point, reboot your system so the device will recognize the changes.
 sudo shutdown -h now
 ```
 
-### Optional, but highly recommended
+### **Optional, but highly recommended**
 You may encounter an error that says
-```bash
+```python
 _bluetooth.error: (13, 'Permission denied')
 ```
 
 An easy, but not recommended, workaround is to run the script as the root user. We suggest the following. Make sure your pi user is in the bluetooth group.
-```
+```bash
 cat /etc/group | grep bluetooth
 ```
 
-If your device 
+If your device  is not, add `pi` to `bluetooth` group:
+```bash
+sudo usermod -G bluetooth -a pi
+```
+
+Change the group of the `/var/run/sdp` file:
+```bash
+sudo chgrp bluetooth /var/run/sdp
+```
+
+To make the change persistent after you reboot your device, create the file `/etc/systemd/system/var-run-sdp.path` with the following content:
+```
+[Unit]
+Description=Monitor /var/run/sdp
+
+[Install]
+WantedBy=bluetooth.service
+
+[Path]
+PathExists=/var/run/sdp
+Unit=var-run-sdp.service
+```
+
+Also add this file `/etc/systemd/system/var-run-sdp.service`:
+```
+[Unit]
+Description=Set permission of /var/run/sdp
+
+[Install]
+RequiredBy=var-run-sdp.path
+
+[Service]
+Type=simple
+ExecStart=/bin/chgrp bluetooth /var/run/sdp
+```
+
+Finally, start everything up:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable var-run-sdp.path
+sudo systemctl enable var-run-sdp.service
+sudo systemctl start var-run-sdp.path
+```
 
 ## Installing
 Clone the repository to your desired directory and cd into it.
