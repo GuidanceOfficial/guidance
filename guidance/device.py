@@ -50,6 +50,11 @@ class Device:
         # self.server_sock.close()
 
 
+    def find(self, addr):
+        """Search for device with mac address addr."""
+        return find_service(uuid=self.uuid, address=addr)
+
+
     def send(self, addr):
         service_match = find_service(uuid=self.uuid, address=addr) # the UUID are the same for both devices at the moment
         
