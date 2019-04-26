@@ -4,7 +4,6 @@ from random import randint
 from random import choice
 
 if __name__ == "__main__":
-    print()
     os.makedirs(os.path.dirname(os.path.realpath(__file__)) + "/data", exist_ok=True)
 
     turns = ["L", "R"]
