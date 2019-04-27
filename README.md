@@ -1,6 +1,8 @@
 # Guidance
 Guidance is a navigation system used to provide users with a way of traveling from point A to point B without the need to use their sense of sight or hearing.
 
+<img src="./guidance.png" width=300>
+
 ### To-Do
 * Add pybluez to requirements.txt
 * Add infrastructure diagram
