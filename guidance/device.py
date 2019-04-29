@@ -76,7 +76,7 @@ class Device:
 
 
     def send(self, payload):
-        self.peer_server_sock.send(payload)
+        self.peer_server_sock.sendall(payload)
 
 
     def close_connection_to_peer(self):
