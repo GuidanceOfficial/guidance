@@ -8,7 +8,6 @@ import csv
 
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
-from guidance.motor import Motor
 
 from bluetooth import *
 
@@ -20,27 +19,6 @@ PI_ZERO_ADDRESS1 = "B8:27:EB:2D:D7:36"
 PI_ZERO_ADDRESS2 = "B8:27:EB:D2:45:EF"
 SLEEP_TIME = 5 # seconds
 
-
-def connect_to(addr):
-    btctl = Bluetoothctl()
-    device = Device(btctl.get_address(), BLUETOOTH_PORT)
-
-    while device.is_active():
-        print("Attempting to connect to {}".format(addr))
-        service_match = device.find(addr)
-        
-        if len(service_match) == 0:
-            print("Couldn't find the service at {}".format(addr))
-            sys.exit(0)
-
-        match = service_match[0]
-        port, name, host = match["port"], mathc["name"], match["host"]
-
-        sock = BluetoothSocket(RFCOMM)
-        sock.connect((host, port))
-        print("Connected to {}".format(addr))
-
-
 def receive_data(sock, data, default=True):
     if default:
         return sock.recv(PAYLOAD)
@@ -49,7 +27,9 @@ def receive_data(sock, data, default=True):
         # sleep(SLEEP_TIME)
         return bytes("{},{}".format(data[0], data[1]), "utf-8")
 
-
+def process_data(data):
+    """When the data is received from the iPhone, process it before sending to pi zeros."""
+    return data
 
 if __name__ == "__main__":
     btctl = Bluetoothctl()
@@ -58,27 +38,20 @@ if __name__ == "__main__":
     dummy_data = list(dummy_data_reader)[1:]
     
     while device.is_active():
-        # print("Waiting for connection on port {}".format(BLUETOOTH_PORT))
-        # client_sock, client_info = device.accept()
-        # with client_sock:
-        if True:
-            # print("Accepted connection from {}".format(client_info))
-            device.connect(PI_ZERO_ADDRESS1)
-            while True:
-                # data = client_sock.recv(PAYLOAD)
-                client_sock = None
-                try:
-                    data = receive_data(client_sock, dummy_data[cur_row], False)
-                except:
-                    data = b""
-                cur_row += 1
-                if not data: break
-                print("Data received to send: [{}]".format(data))
-                # Send data to next device
-                device.send(data)
-            device.close_connection_to_peer()
-        # client_sock.close()
-        break
+        # Listen for data
+        data = b""
+        client_sock, client_info = device.accept()
+        while True:
+            incoming_data = client_sock.recv(PAYLOAD)
+            if not incoming_data: break
+            data += incoming_data
+        client_sock.close()
 
+        # Process data    
+        data = process_data(data)
 
-
+        # Send data
+        recipient = PI_ZERO_ADDRESS1 if data[0] == b"L" else PI_ZERO_ADDRESS2
+        device.connect(recipient)
+        device.send(data)
+        device.close_connection_to_peer()
