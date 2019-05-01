@@ -38,7 +38,6 @@ def get_recipient(data):
 
 def process_data(data):
     """When the data is received from the iPhone, process it before sending to pi zeros."""
-    cur_data = next(data)
     if isinstance(data, list):
         # Get data from dummy data source
         return cur_data
