@@ -40,7 +40,7 @@ def process_data(data):
     """When the data is received from the iPhone, process it before sending to pi zeros."""
     if isinstance(data, list):
         # Get data from dummy data source
-        return cur_data
+        return data
     else:
         # Data is coming in from some api
         # Do some processing
