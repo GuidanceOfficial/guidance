@@ -33,7 +33,7 @@ def get_direction(sock):
 
 
 def get_recipient(data):
-    return PI_ZERO_ADDRESS1 if data[0] == b"L" else PI_ZERO_ADDRESS2
+    return PI_ZERO_ADDRESS1 if data[0] == b"L" and not API_IS_WORKING else PI_ZERO_ADDRESS2
 
 
 def process_data(data):
