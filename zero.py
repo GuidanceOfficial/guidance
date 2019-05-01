@@ -20,6 +20,7 @@ if __name__ == "__main__":
     motor = Motor(MOTOR_PIN, QUERY_TIME_DELTA)
     
     while device.is_active():
+        print("Waiting for connection...")
         # Listen for data
         client_sock, client_info = device.accept()
         data = client_sock.recv(PAYLOAD)
