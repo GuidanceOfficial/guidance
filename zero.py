@@ -21,12 +21,8 @@ if __name__ == "__main__":
     
     while device.is_active():
         # Listen for data
-        data = b""
         client_sock, client_info = device.accept()
-        while True:
-            incoming_data = client_sock.recv(PAYLOAD)
-            if not incoming_data: break
-            data += incoming_data
+        data = client_sock.recv(PAYLOAD)
         client_sock.close()
 
         # Translate data to motor command

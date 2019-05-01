@@ -13,7 +13,6 @@ class Motor:
         self.time_delta = time_delta
         self._setup()
         self.duty_cycle = 50
-        self.pwm = GPIO.PWM(self.pin, self.freq)
 
     
     def _setup(self):
@@ -39,15 +38,16 @@ class Motor:
         elif dist <= 9 * bound: duty_cycle = 20
         else:                   duty_cycle = 0
         self.pwm.ChangeDutyCycle(duty_cycle)
-        sleep(self.time_delta) # Send the signal for time_delta seconds
-        self.stop()
+        return self
 
+
+    def stop_vibrating(self):
+        self.pwm.ChangeDutyCycle(0)
         return self
 
 
     def stop(self):
-        self.pwm.ChangeDutyCycle(0)
-        return self
+        self.pwm.stop()
 
 
     def change_freq(freq):

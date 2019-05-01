@@ -38,16 +38,6 @@ class Device:
     def accept(self):
         client_sock, client_info = self.server_sock.accept()
         return client_sock, client_info
-        # print("Accepted connection from {}".format(client_info))
-        # try:
-        #     while True:
-        #         data = client_sock.recv(1024)
-        #         if len(data) == 0: break
-        #         print("Received: [{}]".format(data))
-        # except IOError:
-        #     pass
-        # client_sock.close()
-        # self.server_sock.close()
 
 
     def find(self, addr):
@@ -68,11 +58,6 @@ class Device:
         sock = BluetoothSocket(RFCOMM)
         sock.connect((host, port))
         self.peer_server_sock = sock
-        # print("Connected. Type something:")
-        # while True:
-            # data = input()
-            # if len(data) == 0:break
-            # sock.send(data)
 
 
     def send(self, payload):
