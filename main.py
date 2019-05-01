@@ -24,7 +24,7 @@ API_IS_WORKING = False
 
 def get_direction(sock):
     """Queries API every QUERY_TIME_DELTA seconds"""
-    if sock:
+    if not sock:
         with open("./data/dummy_travel_data.csv") as directions:
             for direction in csv.reader(directions):
                 yield direction
