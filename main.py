@@ -42,10 +42,7 @@ def process_data(data):
     """When the data is received from the iPhone, process it before sending to pi zeros."""
     if isinstance(data, list):
         # Get data from dummy data source
-        return bytes(
-            "{},{}".format(data[0], data[1]),
-            "utf-8"
-        )
+        return bytes(data[1], "utf-8")
     else:
         # Data is coming in from some api
         # Do some processing
