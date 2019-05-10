@@ -8,6 +8,8 @@ import csv
 
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
+from guidance.monitor import Monitor
+from guidance.monitor import *
 
 from bluetooth import *
 from time import sleep
@@ -42,7 +44,7 @@ def process_data(data):
     """When the data is received from the iPhone, process it before sending to pi zeros."""
     if isinstance(data, list):
         # Get data from dummy data source
-        return bytes(data[1], "utf-8")
+        return bytes(" ".join(data), "utf-8")
     else:
         # Data is coming in from some api
         # Do some processing
@@ -54,8 +56,12 @@ if __name__ == "__main__":
     iter_direction = iter(get_direction(None))
     next(iter_direction) # skip header
 
+    monitor = Monitor(screen)
     
     while device.is_active():
+        # Update tft
+        monitor.check_screen()
+
         # Listen for data
         client_sock, client_info = device.accept() if API_IS_WORKING else None, None
         sleep(QUERY_TIME_DELTA)
@@ -64,8 +70,13 @@ if __name__ == "__main__":
             client_sock.close()
 
         # Process data    
-        data = process_data(data)
-        print("Data: {}".format(data))
+        direction, distance = process_data(data).split(" ")
+        print("Direction: {} - Distance: {}".format(direction, distance))
+
+        # Show data to be sent on Pi's tft screen
+        monitor.direction( direction.decode("utf-8") )
+        monitor.distance( distance.decode("utf-8") )
+        monitor.update_screen()
 
         # Send data
         recipient = get_recipient(data)
