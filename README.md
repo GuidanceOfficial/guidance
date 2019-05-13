@@ -113,7 +113,7 @@ python3 -m venv <venv_name>
 
 Now activate your newly created virtual environment
 ```
-source activate <venv_name>/bin/activate
+source <venv_name>/bin/activate
 ```
 
 At this point, we can install the required dependencies using pip.

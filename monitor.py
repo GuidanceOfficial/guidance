@@ -3,11 +3,15 @@ import RPi.GPIO as GPIO
 import os
 import pygame
 import sys
+import threading
+import gevent.monkey; gevent.monkey.patch_tread()
 import time
 
 from pygame.locals import *
 
 isOnTFT = False
+
+path = "/home/pi/Development/guidance/log_fifo"
 
 if isOnTFT:
     os.putenv("SDL_VIDEODRIVER","fbcon")
@@ -24,6 +28,10 @@ CENTER_POS=(160, 120)
 pygame.init()
 screen = pygame.display.set_mode((320, 240))
 pygame.mouse.set_visible(not isOnTFT)
+
+#Set up the quit button
+def quit(channel):
+    sys.exit()
 
 class Monitor:
 
@@ -85,13 +93,32 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((320, 240))
     pygame.mouse.set_visible(not isOnTFT)
     
+    
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(27, GPIO.FALLING, callback=quit)
+    
     # Create Monitor instance
     nav = Monitor(screen)
-    nav.direction("R")
-    nav.distance(10)
+   
+    nav.direction("-")
+    nav.distance(0)
+
+
     nav.update_screen(WHITE,20)
 
     running = True
     while running:
         running = nav.check_screen()
+        with open(path) as fifo:
+            myline = fifo.readline()
+            if str(myline.strip()) == "Arrived":
+                running = False
+            else:
+                direction = myline[0]
+                nav.direction(direction)
+                nav.distance(float(myline[1]))
+                nav.update_screen(WHITE,20)
         time.sleep(.02)
+    GPIO.cleanup()
+

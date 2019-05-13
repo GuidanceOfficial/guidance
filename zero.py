@@ -12,7 +12,7 @@ MOTOR_PIN = 27
 BLUETOOTH_PORT = 1
 PAYLOAD = 1024
 END_TRANSMISSION = b"-1"
-QUERY_TIME_DELTA = 5
+SLEEP_TIME_DELTA = 3
 
 if __name__ == "__main__":
     btctl = Bluetoothctl()
@@ -20,12 +20,16 @@ if __name__ == "__main__":
     motor = Motor(MOTOR_PIN, QUERY_TIME_DELTA)
     
     while device.is_active():
-        print("Waiting for connection...")
-        # Listen for data
-        client_sock, client_info = device.accept()
-        data = client_sock.recv(PAYLOAD)
-        client_sock.close()
+        try:
+            print("Waiting for connection...")
+            # Listen for data
+            client_sock, client_info = device.accept()
+            data = client_sock.recv(PAYLOAD)
+            client_sock.close()
 
-        # Translate data to motor command
-        distance = int(data)
-        motor.vibrate(distance)
+            # Translate data to motor command
+            distance = int(data)
+            motor.vibrate(distance)
+
+        except:
+            print("Something bad happened. Trying again.")

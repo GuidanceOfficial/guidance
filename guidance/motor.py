@@ -38,6 +38,8 @@ class Motor:
         elif dist <= 9 * bound: duty_cycle = 20
         else:                   duty_cycle = 0
         self.pwm.ChangeDutyCycle(duty_cycle)
+        sleep(self.time_delta)
+        self.pwm.stop_vibrating()
         return self
 
 
