@@ -6,6 +6,7 @@ This file needs to be tailored towards your device specific mac address
 """
 import csv
 import json
+import os
 import serial
 import subprocess
 
@@ -123,39 +124,52 @@ def execute(action, path_to_fifo):
 
 
 if __name__ == "__main__":
-    # btctl = Bluetoothctl()
-    # device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    # device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
+    btctl = Bluetoothctl()
+    device = Device(btctl.get_address(), BLUETOOTH_PORT)
+    device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
     iter_direction = iter(get_direction(None))
     next(iter_direction) # skip header
     
-    # while device.is_active():
-    while True:
+    while device.is_active():
         try:
             # Listen for data
-            # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
-            sleep(QUERY_TIME_DELTA)
-            data = next(iter_direction)
-            if API_IS_WORKING:
-                client_sock.close()
-
-            # Process data    
-            direction, distance = process_data(data).split(b" ")
-            direction = direction.decode("utf-8")
-            distance = distance.decode("utf-8")
-            print("{}".format(data))
-            execute("{},{}".format(direction, distance), PATH_TO_FIFO)
-
-            # Send data
-            recipient = get_recipient(direction)
-            if recipient == PI_ZERO_ADDRESS1:
-                device.connect(recipient)
+            
+            #Check if we neet to shutdown
+            exists=os.path.isfile("ShutDown.txt")
+            if exists:
+                distance=-1
+                device.connect(PI_ZERO_ADDRESS1)
                 device.send(distance)
                 device.close_connection_to_peer()
-            else:
-                device2.connect(recipient)
+                device2.connect(PI_ZERO_ADDRESS2)
                 device2.send(distance)
                 device2.close_connection_to_peer()
+                os.remove("ShutDown.txt")
+                device.active = False
+            else:
+                # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
+                sleep(QUERY_TIME_DELTA)
+                data = next(iter_direction)
+                if API_IS_WORKING:
+                    client_sock.close()
+
+                # Process data    
+                direction, distance = process_data(data).split(b" ")
+                direction = direction.decode("utf-8")
+                distance = distance.decode("utf-8")
+                print("{}".format(data))
+                execute("{},{}".format(direction, distance), PATH_TO_FIFO)
+
+                # Send data
+                recipient = get_recipient(direction)
+                if recipient == PI_ZERO_ADDRESS1:
+                    device.connect(recipient)
+                    device.send(distance)
+                    device.close_connection_to_peer()
+                else:
+                    device2.connect(recipient)
+                    device2.send(distance)
+                    device2.close_connection_to_peer()
         except:
             # Send the error message to the TFT and retry
             execute("There was an error...", PATH_TO_FIFO)

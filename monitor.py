@@ -3,13 +3,12 @@ import RPi.GPIO as GPIO
 import os
 import pygame
 import sys
-import threading
-import gevent.monkey; gevent.monkey.patch_tread()
+import subprocess
 import time
 
 from pygame.locals import *
 
-isOnTFT = False
+isOnTFT = True
 
 path = "/home/pi/Development/guidance/log_fifo"
 
@@ -21,17 +20,13 @@ if isOnTFT:
 
 BLACK = (0 , 0, 0)
 WHITE = (255, 255, 255)
-EXIT_POS=(300, 220)
+EXIT_POS=(260, 220)
 CENTER_POS=(160, 120)
 
 #Initialize oygame
-pygame.init()
-screen = pygame.display.set_mode((320, 240))
-pygame.mouse.set_visible(not isOnTFT)
-
-#Set up the quit button
-def quit(channel):
-    sys.exit()
+#pygame.init()
+#screen = pygame.display.set_mode((320, 240))
+#pygame.mouse.set_visible(not isOnTFT)
 
 class Monitor:
 
@@ -39,12 +34,12 @@ class Monitor:
         self.display = display
 
       
-    def direction(self, L_R):
+    def set_direction(self, L_R):
         self.direction = L_R
         return self
 
 
-    def distance(self, feet):
+    def set_distance(self, feet):
         self.distance = feet
         return self
     
@@ -56,9 +51,12 @@ class Monitor:
         return (text_surf, rect)
 
 
-    def update_screen(self, color=(255,255,255), size=20):
+    def update_screen(self, color=(255,255,255), size=20, message=None):
         # Add text and the exit button
-        text=["Turning {} in {} feet".format(self.direction, self.distance), "Exit"]
+        if message == None:
+            text=["Turning {} in {} feet".format(self.direction, self.distance), "Shutdown"]
+        else:
+            text=[message, "Shutdown"]
 
         position=[CENTER_POS,EXIT_POS]
         txt_pos=[(text[0], position[0]),(text[1], position[1])]
@@ -86,6 +84,13 @@ class Monitor:
                 return not self._inside_quit(tl, br, x, y)
         return True
 
+def quit(channel):
+    execute("Quit", path)
+
+def execute(action, path_to_fifo):
+    """Sends the action to the fifo at <path_to_fifo>."""
+    cmd = 'echo "{}" > {}'.format(action, path_to_fifo)
+    subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
     # Initialize oygame
@@ -94,18 +99,17 @@ if __name__ == "__main__":
     pygame.mouse.set_visible(not isOnTFT)
     
     
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(27, GPIO.FALLING, callback=quit)
-    
     # Create Monitor instance
     nav = Monitor(screen)
    
-    nav.direction("-")
-    nav.distance(0)
+    nav.set_direction("-")
+    nav.set_distance(0)
+    nav.update_screen(WHITE,30,"Welcome")
 
-
-    nav.update_screen(WHITE,20)
+    #GPIO set up
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(27, GPIO.FALLING, callback = quit)
 
     running = True
     while running:
@@ -113,12 +117,19 @@ if __name__ == "__main__":
         with open(path) as fifo:
             myline = fifo.readline()
             if str(myline.strip()) == "Arrived":
+                nav.update_screen(WHITE,30,"Arrived")
+            elif str(myline.strip()) == "Quit":
                 running = False
             else:
+                myline = myline.split(",")
                 direction = myline[0]
-                nav.direction(direction)
-                nav.distance(float(myline[1]))
+                nav.set_direction(direction)
+                nav.set_distance(float(myline[1]))
                 nav.update_screen(WHITE,20)
         time.sleep(.02)
     GPIO.cleanup()
+    f=open("ShutDown.txt","w+")
+    #execute("Quit", PATH_TO_FIFO)
+
+
 
