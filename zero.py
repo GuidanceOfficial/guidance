@@ -4,6 +4,9 @@ neighboring devices.
 
 This file needs to be tailored
 """
+import sys
+
+
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
 from guidance.motor import Motor
