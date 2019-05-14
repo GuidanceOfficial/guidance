@@ -135,10 +135,10 @@ if __name__ == "__main__":
     while device.is_active():
         try:
             # Listen for data
-            
             #Check if we neet to shutdown
             exists = os.path.isfile("shutdown")
             if exists:
+                os.remove("shutdown")
                 distance=-1
                 device.connect(PI_ZERO_ADDRESS1)
                 device.send(distance)
@@ -146,7 +146,6 @@ if __name__ == "__main__":
                 device2.connect(PI_ZERO_ADDRESS2)
                 device2.send(distance)
                 device2.close_connection_to_peer()
-                os.remove("shutdown")
                 device.active = False
             else:
                 # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
@@ -164,6 +163,7 @@ if __name__ == "__main__":
 
                 # Send data
                 recipient = get_recipient(direction)
+                print("Here...")
                 if recipient == PI_ZERO_ADDRESS1:
                     device.connect(recipient)
                     device.send(distance)

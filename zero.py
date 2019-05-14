@@ -49,5 +49,5 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("Ending program...")
             sys.exit(0)
-        finally:
+        except:
             print("Something bad happened. Trying again.")
