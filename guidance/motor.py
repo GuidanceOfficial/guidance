@@ -39,7 +39,7 @@ class Motor:
         else:                   duty_cycle = 0
         self.pwm.ChangeDutyCycle(duty_cycle)
         sleep(self.time_delta)
-        self.pwm.stop_vibrating()
+        self.stop_vibrating()
         return self
 
 

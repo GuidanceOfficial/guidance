@@ -116,6 +116,7 @@ if __name__ == "__main__":
         running = nav.check_screen()
         with open(path) as fifo:
             myline = fifo.readline()
+            print("myline: {}".format(myline))
             if str(myline.strip()) == "Arrived":
                 nav.update_screen(WHITE,30,"Arrived")
             elif str(myline.strip()) == "Quit":
@@ -128,7 +129,7 @@ if __name__ == "__main__":
                 nav.update_screen(WHITE,20)
         time.sleep(.02)
     GPIO.cleanup()
-    f=open("ShutDown.txt","w+")
+    f = open("shutdown","w+")
     #execute("Quit", PATH_TO_FIFO)
 
 

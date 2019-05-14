@@ -9,6 +9,8 @@ import json
 import os
 import serial
 import subprocess
+import sys
+
 
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
@@ -135,7 +137,7 @@ if __name__ == "__main__":
             # Listen for data
             
             #Check if we neet to shutdown
-            exists=os.path.isfile("ShutDown.txt")
+            exists = os.path.isfile("shutdown")
             if exists:
                 distance=-1
                 device.connect(PI_ZERO_ADDRESS1)
@@ -144,7 +146,7 @@ if __name__ == "__main__":
                 device2.connect(PI_ZERO_ADDRESS2)
                 device2.send(distance)
                 device2.close_connection_to_peer()
-                os.remove("ShutDown.txt")
+                os.remove("shutdown")
                 device.active = False
             else:
                 # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
@@ -170,6 +172,8 @@ if __name__ == "__main__":
                     device2.connect(recipient)
                     device2.send(distance)
                     device2.close_connection_to_peer()
+        except KeyboardInterrupt:
+            sys.exit(0)
         except:
             # Send the error message to the TFT and retry
-            execute("There was an error...", PATH_TO_FIFO)
+            print("There was an error...")
