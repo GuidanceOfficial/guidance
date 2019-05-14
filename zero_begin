@@ -1,5 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 source ./venv/bin/activate
 python ./motor_test.py
 python ./zero.py
-sudo shutdown -h now

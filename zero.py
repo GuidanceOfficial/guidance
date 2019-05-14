@@ -16,6 +16,11 @@ END_TRANSMISSION = b"-1"
 SLEEP_TIME_DELTA = 3
 
 
+def signal_handler(sig, frame):
+    print("You pressed Ctrl+C")
+    sys.exit(0)
+
+
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
@@ -38,5 +43,8 @@ if __name__ == "__main__":
             else:
                 motor.vibrate(distance)
 
-        except:
+        except KeyboardInterrupt:
+            print("Ending program...")
+            sys.exit(0)
+        finally:
             print("Something bad happened. Trying again.")
