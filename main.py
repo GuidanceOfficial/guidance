@@ -5,6 +5,8 @@ neighboring devices.
 This file needs to be tailored towards your device specific mac address
 """
 import csv
+import json
+import serial
 import subprocess
 
 from guidance.bluetoothctl import Bluetoothctl
@@ -25,6 +27,11 @@ PI_ZERO_ADDRESS2 = "B8:27:EB:D2:45:EF"
 QUERY_TIME_DELTA = 3 # seconds
 API_IS_WORKING = False
 PATH_TO_FIFO = "/home/pi/Development/guidance/log_fifo"
+PACKET_SIZE = 64
+RIGHT_OPTIONS = (
+        "turn-slight-right", "turn-sharp-right", "uturn-right",
+        "turn-right", "ramp-right", "fork-right", "roundabout-right",
+        )
 
 def get_direction(sock):
     """Queries API every QUERY_TIME_DELTA seconds"""
@@ -33,7 +40,61 @@ def get_direction(sock):
             for direction in csv.reader(directions):
                 yield direction
     else:
-        yield sock.recv(PAYLOAD) # infomation received from hm-10 serial device
+        iter_count = 0
+        while True:
+            iter_count += 1
+            ser = serial.Serial("/dev/ttyUSB0") # default baud rate 9600
+            print("Serial Port Initialized...")
+            sleep(1)
+            payload_size = ser.read(4)
+            print("Payload Size: {}".format(payload_size))
+            # payload_size = int(ser.read(4))
+            payload_size = int(payload_size)
+            primary_chunk_size = payload_size // PACKET_SIZE
+            remaining_chunk_size = payload_size - primary_chunk_size
+
+            data = b""
+            data += ser.read(primary_chunk_size + remaining_chunk_size)
+            print("Size of data: {}".format(len(data)))
+
+            try:
+                dataAsDict = json.loads(data)
+            except:
+                print("Trouble parsing string as JSON.")
+
+            stepsArray = []
+            remaining_distance = 0
+            try:
+                stepsArray = dataAsDict["routes"][0]["legs"][0]["steps"]
+                remaining_distance = data_as_dict["routes"][0]["legs"][0]["distance"]["text"]
+                
+                metric = remaining_distance[-2:]
+                if metric == "mi":
+                    remaining_distance = float(remaining_distance[: len(remaining_distance) - 2] ) * 5280
+                else:
+                    remaining_distance = float(remaining_distance[: len(remaining_distance) - 2 ])
+                # print("Steps Array: {}".format(stepsArray))
+            except:
+                print("Encountered error searching for keys.")
+
+            if remaining_distance < 100:
+                yield ["A", "0"]
+                break
+
+            distance = 0
+            direction = ""
+            if not isinstance(stepsArray, list):
+                stepsArray = [stepsArray] # convert to iterable
+            
+            for step in stepsArray:
+                dist = step["distance"]["text"]
+                distance += int(dist[: len(dist) - 2 ]) # expecting distance in ft
+                if "maneuver" in step:
+                    direction = "R" if any(right_word in step["maneuver"] for right_word in RIGHT_OPTIONS) else "L" 
+                    break
+            
+            yield [direction, distance]
+            print("{}.) Direction: {} - Distance: {} ft".format(iter_count, direction, distance)) # infomation received from hm-10 serial device
 
 
 def get_recipient(direction):
@@ -62,16 +123,17 @@ def execute(action, path_to_fifo):
 
 
 if __name__ == "__main__":
-    btctl = Bluetoothctl()
-    device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
+    # btctl = Bluetoothctl()
+    # device = Device(btctl.get_address(), BLUETOOTH_PORT)
+    # device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
     iter_direction = iter(get_direction(None))
     next(iter_direction) # skip header
     
-    while device.is_active():
+    # while device.is_active():
+    while True:
         try:
             # Listen for data
-            client_sock, client_info = device.accept() if API_IS_WORKING else None, None
+            # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
             sleep(QUERY_TIME_DELTA)
             data = next(iter_direction)
             if API_IS_WORKING:
@@ -81,18 +143,19 @@ if __name__ == "__main__":
             direction, distance = process_data(data).split(b" ")
             direction = direction.decode("utf-8")
             distance = distance.decode("utf-8")
+            print("{}".format(data))
             execute("{},{}".format(direction, distance), PATH_TO_FIFO)
 
             # Send data
-            # recipient = get_recipient(direction)
-            # if recipient == PI_ZERO_ADDRESS1:
-            #     device.connect(recipient)
-            #     device.send(distance)
-            #     device.close_connection_to_peer()
-            # else:
-            #     device2.connect(recipient)
-            #     device2.send(distance)
-            #     device2.close_connection_to_peer()
+            recipient = get_recipient(direction)
+            if recipient == PI_ZERO_ADDRESS1:
+                device.connect(recipient)
+                device.send(distance)
+                device.close_connection_to_peer()
+            else:
+                device2.connect(recipient)
+                device2.send(distance)
+                device2.close_connection_to_peer()
         except:
             # Send the error message to the TFT and retry
             execute("There was an error...", PATH_TO_FIFO)

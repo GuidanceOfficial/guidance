@@ -1,5 +1,4 @@
 #!/bin/sh
 source ./venv/bin/activate # you'll of course need to out your venv name
-python ./quit_helper.py &
+python2 ./monitor.py &
 python ./main.py
-

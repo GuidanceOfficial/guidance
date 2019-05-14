@@ -29,16 +29,29 @@ if __name__ == "__main__":
         print("Size of data: {}".format(len(data)))
 
         try:
-            dataAsDict = json.loads(data)
+            data_as_dict = json.loads(data)
         except:
             print("Trouble parsing string as JSON.")
 
         stepsArray = []
+        remaining_distance = 0
         try:
-            stepsArray = dataAsDict["routes"][0]["legs"][0]["steps"]
+            stepsArray = data_as_dict["routes"][0]["legs"][0]["steps"]
+            remaining_distance = data_as_dict["routes"][0]["legs"][0]["distance"]["text"]
+            
+            metric = remaining_distance[-2:]
+            if metric == "mi":
+                remaining_distance = float(remaining_distance[: len(remaining_distance) - 2] ) * 5280
+            else:
+                remaining_distance = float(remaining_distance[: len(remaining_distance) - 2 ])
+
+            # print("Remaining Distance: {}ft".format(remaining_distance))
             # print("Steps Array: {}".format(stepsArray))
         except:
             print("Encountered error searching for keys.")
+
+        if remaining_distance < 100:
+            data = ["A", "0"]
 
         distance = 0
         direction = ""

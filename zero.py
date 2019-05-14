@@ -8,16 +8,18 @@ from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
 from guidance.motor import Motor
 
+
 MOTOR_PIN = 27
 BLUETOOTH_PORT = 1
 PAYLOAD = 1024
 END_TRANSMISSION = b"-1"
 SLEEP_TIME_DELTA = 3
 
+
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
-    motor = Motor(MOTOR_PIN, QUERY_TIME_DELTA)
+    motor = Motor(MOTOR_PIN, SLEEP_TIME_DELTA)
     
     while device.is_active():
         try:
@@ -29,7 +31,12 @@ if __name__ == "__main__":
 
             # Translate data to motor command
             distance = int(data)
-            motor.vibrate(distance)
+            if distance < 0:
+                device.active = False
+                motor.stop_vibrating()
+                motor.stop()
+            else:
+                motor.vibrate(distance)
 
         except:
             print("Something bad happened. Trying again.")
