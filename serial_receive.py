@@ -25,7 +25,13 @@ if __name__ == "__main__":
 
         try:
             stepsArray = dataAsDict["routes"][0]["legs"][0]["steps"]
-            print("Steps Array: {}".format(stepsArray))
+            # print("Steps Array: {}".format(stepsArray))
         except:
             print("Encountered error searching for keys.")
+
+        if isinstance(stepsArray, list):
+            for obj in stepsArray:
+                print(obj)
+        else:
+            print("Not a list.")
 

@@ -8,7 +8,7 @@ import time
 
 from pygame.locals import *
 
-isOnTFT = False
+isOnTFT = True
 
 path = "/home/pi/Development/guidance/log_fifo"
 
@@ -24,9 +24,9 @@ EXIT_POS=(300, 220)
 CENTER_POS=(160, 120)
 
 #Initialize oygame
-pygame.init()
-screen = pygame.display.set_mode((320, 240))
-pygame.mouse.set_visible(not isOnTFT)
+#pygame.init()
+#screen = pygame.display.set_mode((320, 240))
+#pygame.mouse.set_visible(not isOnTFT)
 
 class Monitor:
 
@@ -84,6 +84,13 @@ class Monitor:
                 return not self._inside_quit(tl, br, x, y)
         return True
 
+def quit(channel):
+    execute("Quit", path)
+
+def execute(action, path_to_fifo):
+    """Sends the action to the fifo at <path_to_fifo>."""
+    cmd = 'echo "{}" > {}'.format(action, path_to_fifo)
+    subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
     # Initialize oygame
@@ -97,9 +104,12 @@ if __name__ == "__main__":
    
     nav.direction("-")
     nav.distance(0)
-
-
     nav.update_screen(WHITE,20,"Welcome")
+
+    #GPIO set up
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(27, GPIO.FALLING, callback = quit)
 
     running = True
     while running:
@@ -118,6 +128,7 @@ if __name__ == "__main__":
                 nav.update_screen(WHITE,20)
         time.sleep(.02)
     GPIO.cleanup()
+    #execute("Quit", PATH_TO_FIFO)
 
 
 
