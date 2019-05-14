@@ -84,15 +84,15 @@ if __name__ == "__main__":
             execute("{},{}".format(direction, distance), PATH_TO_FIFO)
 
             # Send data
-            recipient = get_recipient(direction)
-            if recipient == PI_ZERO_ADDRESS1:
-                device.connect(recipient)
-                device.send(distance)
-                device.close_connection_to_peer()
-            else:
-                device2.connect(recipient)
-                device2.send(distance)
-                device2.close_connection_to_peer()
+            # recipient = get_recipient(direction)
+            # if recipient == PI_ZERO_ADDRESS1:
+            #     device.connect(recipient)
+            #     device.send(distance)
+            #     device.close_connection_to_peer()
+            # else:
+            #     device2.connect(recipient)
+            #     device2.send(distance)
+            #     device2.close_connection_to_peer()
         except:
             # Send the error message to the TFT and retry
             execute("There was an error...", PATH_TO_FIFO)
