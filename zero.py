@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
             # Translate data to motor command
             distance = int(data)
+            print("Data: {}".format(distance))
             if distance < 0:
                 device.active = False
                 motor.stop_vibrating()
