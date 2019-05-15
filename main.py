@@ -146,8 +146,8 @@ if __name__ == "__main__":
             # Process data
             print("Data from api: {}".format(data))
             direction, distance = process_data(data).split(b" ")
-            # direction = direction.decode("utf-8")
-            direction = random.choice(["L", "R"]) # delete after
+            direction = direction.decode("utf-8")
+            # direction = random.choice(["L", "R"]) # delete after
             distance = distance.decode("utf-8")
             monitor.set_direction(direction)
             monitor.set_distance(distance)

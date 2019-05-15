@@ -25,7 +25,8 @@ CENTER_POS = (160, 120)
 
 
 def quit_it(channel):
-    sys.exit(0)
+    subprocess.call(["sudo", "shutdown", "-h", "now"])
+    # sys.exit(0)
 
 
 class Monitor:
