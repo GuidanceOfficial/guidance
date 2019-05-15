@@ -20,7 +20,7 @@ class Motor:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
         self.pwm = GPIO.PWM(self.pin, self.freq)
-        self.pwm.start(0)
+        self.pwm.start(1)
 
 
     def vibrate(self, dist):

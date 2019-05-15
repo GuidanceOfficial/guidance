@@ -117,16 +117,17 @@ if __name__ == "__main__":
         with open(path) as fifo:
             myline = fifo.readline()
             print("myline: {}".format(myline))
-            if str(myline.strip()) == "Arrived":
-                nav.update_screen(WHITE,30,"Arrived")
-            elif str(myline.strip()) == "Quit":
+            if str(myline.strip()) == "Quit":
                 running = False
             else:
                 myline = myline.split(",")
                 direction = myline[0]
-                nav.set_direction(direction)
-                nav.set_distance(float(myline[1]))
-                nav.update_screen(WHITE,20)
+                if direction == "A":
+                    nav.update_screen(WHITE,30,"Arrived")
+                else:
+                    nav.set_direction(direction)
+                    nav.set_distance(float(myline[1]))
+                    nav.update_screen(WHITE,20)
         time.sleep(.02)
     GPIO.cleanup()
     f = open("shutdown","w+")

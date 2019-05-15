@@ -109,3 +109,6 @@ venv.bak/
 
 # vscode
 .vscode
+
+# ignore marker file
+shutdown
