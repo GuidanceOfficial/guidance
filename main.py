@@ -14,8 +14,8 @@ import sys
 
 from guidance.bluetoothctl import Bluetoothctl
 from guidance.device import Device
-# from guidance.monitor import Monitor
-# from guidance.monitor import *
+from guidance.monitor import Monitor
+from guidance.monitor import *
 
 from bluetooth import *
 from time import sleep
@@ -47,20 +47,25 @@ def get_direction(sock):
     else:
         ser = serial.Serial("/dev/ttyUSB0") # default baud rate 9600
         print("Serial Port Initialized...")
-        payload_size = ser.read(3)
+
+        incoming_data = ser.read(1)
+        while chr(incoming_data[-1]) != "{":
+            print("Incoming Data: ", incoming_data)
+            incoming_data += ser.read(1)
+
+        payload_size = incoming_data[:-1]
         print("Payload Size: {}".format(payload_size))
         # payload_size = int(ser.read(4))
         payload_size = int(payload_size)
         primary_chunk_size = payload_size // PACKET_SIZE
-        remaining_chunk_size = payload_size - primary_chunk_size
+        remaining_chunk_size = payload_size - primary_chunk_size - 1
 
-        data = b""
+        data = bytes(chr(incoming_data[-1]), "utf-8")
         data += ser.read(primary_chunk_size + remaining_chunk_size)
         print("\nData: {}\n".format(data))
 
         try:
             data_as_dict = json.loads( data.decode("utf-8") )
-            print("DataAsDict: ", data_as_dict)
         except:
             print("Trouble parsing string as JSON.")
 
@@ -71,13 +76,15 @@ def get_direction(sock):
             remaining_distance = data_as_dict["routes"][0]["legs"][0]["distance"]["text"]
             
             metric = remaining_distance[-2:]
+            print("Metric: ", metric)
+            s = remaining_distance[: len(remaining_distance) - 2]
+            print("Value to convert and type: {} - {}".format(s, type(s)))
             if metric == "mi":
-                # print("Converting to feet...")
+                print("Inside miles...")
                 remaining_distance = float(remaining_distance[: len(remaining_distance) - 2] ) * 5280
             else:
-                # print("Grabbing feet...")
-                remaining_distance = float(remaining_distance[: len(remaining_distance) - 2 ])
-            # print("Steps Array: {}".format(stepsArray))
+                print("Here...")
+                remaining_distance = float(remaining_distance[: len(remaining_distance) - 2] )
         except:
             print("Encountered error searching for keys.")
 
@@ -97,9 +104,7 @@ def get_direction(sock):
                 direction = "R" if any(right_word in step["maneuver"] for right_word in RIGHT_OPTIONS) else "L" 
                 break
         ser.close()
-        # yield [direction, str(distance)]
         return [direction, str(distance)]
-        # print("{}.) Direction: {} - Distance: {} ft".format(iter_count, direction, distance)) # infomation received from hm-10 serial device
 
 
 def get_recipient(direction):
@@ -121,83 +126,55 @@ def process_data(data):
         return data
 
 
-def execute(action, path_to_fifo):
-    """Sends the action to the fifo at <path_to_fifo>."""
-    cmd = 'echo "{}" > {}'.format(action, path_to_fifo)
-    subprocess.check_output(cmd, shell=True)
-
-
 if __name__ == "__main__":
     btctl = Bluetoothctl()
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
     device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
-    # iter_direction = iter(get_direction(True))
-    # next(iter_direction) # skip header
     direction = ""
+
+    monitor = Monitor()
+    monitor.update_screen()
 
     while device.is_active():
         try:
-            # Listen for data
-            #Check if we neet to shutdown
-            exists = os.path.exists("shutdown")
-            if exists or direction == "A":
+        # Listen for data
+            now = time()
+            data = get_direction(True)
+
+            # Process data
+            print("Data from api: {}".format(data))
+            direction, distance = process_data(data).split(b" ")
+            direction = direction.decode("utf-8")
+            distance = distance.decode("utf-8")
+            monitor.set_direction(direction)
+            monitor.set_distance(distance)
+            monitor.update_screen()
+            device.active = monitor.check_screen()
+
+            # Send data
+            recipient = get_recipient(direction)
+            # print("Here...")
+            if not device.is_active() or direction == "A":
                 device.active = False
-                if os.path.exists("./shutdown"):
-                    os.remove("shutdown")
-                distance = b"-1"
                 device.connect(PI_ZERO_ADDRESS1)
                 device.send(distance)
                 device.close_connection_to_peer()
-                print("Sent to pi1")
-                time.sleep(1)
                 device2.connect(PI_ZERO_ADDRESS2)
                 device2.send(distance)
                 device2.close_connection_to_peer()
-                print("sent to pi2")
-                if exists:
-                    fifo=open(PATH_TO_FIFO)
-                    fifo.close()
             else:
-                print("One")
-                now = time()
-                # client_sock, client_info = device.accept() if API_IS_WORKING else None, None
-                # :w
-                # sleep(QUERY_TIME_DELTA)
-                # data = next(iter_direction)
-                data = get_direction(True)
-                # end = time()
-                # print("Time Delta: {}".format(end - now))
-                # continue
-
-                # Process data
-                print("Two")
-                # print("Data from api: {}".format(data))
-                direction, distance = process_data(data).split(b" ")
-                # print("Error after process data")
-                direction = direction.decode("utf-8")
-                distance = distance.decode("utf-8")
-                # print("Error after decode...")
-                # print("{}".format(data))
-                execute("{},{}".format(direction, distance), PATH_TO_FIFO)
-
-                # Send data
-                print("Three")
-                if direction != "A":
-                    recipient = get_recipient(direction)
-                    # print("Here...")
-                    if recipient == PI_ZERO_ADDRESS1:
-                        device.connect(recipient)
-                        device.send(distance)
-                        device.close_connection_to_peer()
-                    else:
-                        device2.connect(recipient)
-                        device2.send(distance)
-                        device2.close_connection_to_peer()
-                end = time()
-                print("Time Delta: {}".format(end - now))
-
+                if recipient == PI_ZERO_ADDRESS1:
+                    device.connect(recipient)
+                    device.send(distance)
+                    device.close_connection_to_peer()
+                else:
+                    device2.connect(recipient)
+                    device2.send(distance)
+                    device2.close_connection_to_peer()
+            end = time()
+            print("Time Delta: {}".format(end - now))
         except KeyboardInterrupt:
             sys.exit(0)
         except:
-            # Send the error message to the TFT and retry
+          # Send the error message to the TFT and retry
             print("There was an error...")

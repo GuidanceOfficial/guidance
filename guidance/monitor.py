@@ -20,18 +20,18 @@ if isOnTFT:
 
 BLACK = (0 , 0, 0)
 WHITE = (255, 255, 255)
-EXIT_POS=(260, 220)
-CENTER_POS=(160, 120)
+EXIT_POS = (260, 220)
+CENTER_POS = (160, 120)
 
-#Initialize oygame
-#pygame.init()
-#screen = pygame.display.set_mode((320, 240))
-#pygame.mouse.set_visible(not isOnTFT)
 
 class Monitor:
 
-    def __init__(self, display):
-        self.display = display
+    def __init__(self):
+        pygame.init()
+        self.display = pygame.display.set_mode( (320,240) )
+        pygame.mouse.set_visible(not isOnTFT)
+        self.direction = ""
+        self.distance = 0
 
       
     def set_direction(self, L_R):
@@ -65,7 +65,7 @@ class Monitor:
         display_objects=[]
         for txt,pos in txt_pos:
             text_surf,rect = self._add_text(txt, pos, size, color)
-            screen.blit(text_surf, rect)
+            self.display.blit(text_surf, rect)
         pygame.display.flip()
 
 
@@ -78,19 +78,13 @@ class Monitor:
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type is MOUSEBUTTONUP:
-                x,y=pygame.mouse.get_pos()
-                tl=(EXIT_POS[0]-80,EXIT_POS[1]-20)
-                br=(320,240)
+                x,y = pygame.mouse.get_pos()
+                print("Touch: {},{}".format(x, y))
+                tl=(EXIT_POS[0] - 80, EXIT_POS[1] - 20)
+                br = (320, 240)
                 return not self._inside_quit(tl, br, x, y)
         return True
 
-def quit(channel):
-    execute("Quit", path)
-
-def execute(action, path_to_fifo):
-    """Sends the action to the fifo at <path_to_fifo>."""
-    cmd = 'echo "{}" > {}'.format(action, path_to_fifo)
-    subprocess.check_output(cmd, shell=True)
 
 if __name__ == "__main__":
     # Initialize oygame

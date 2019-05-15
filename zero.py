@@ -16,7 +16,7 @@ MOTOR_PIN = 27
 BLUETOOTH_PORT = 1
 PAYLOAD = 1024
 END_TRANSMISSION = b"-1"
-SLEEP_TIME_DELTA = 3
+SLEEP_TIME_DELTA = 5
 
 
 def signal_handler(sig, frame):

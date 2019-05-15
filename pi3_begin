@@ -1,4 +1,3 @@
 #!/bin/bash
 source ./venv/bin/activate # you'll of course need to out your venv name
-python2 ./monitor.py &
 python ./main.py
