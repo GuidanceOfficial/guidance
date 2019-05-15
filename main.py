@@ -7,6 +7,7 @@ This file needs to be tailored towards your device specific mac address
 import csv
 import json
 import os
+import random
 import serial
 import subprocess
 import sys
@@ -36,6 +37,7 @@ RIGHT_OPTIONS = (
         "turn-slight-right", "turn-sharp-right", "uturn-right",
         "turn-right", "ramp-right", "fork-right", "roundabout-right",
         )
+
 
 def get_direction(sock):
     """Queries API every QUERY_TIME_DELTA seconds"""
@@ -131,7 +133,7 @@ if __name__ == "__main__":
     device = Device(btctl.get_address(), BLUETOOTH_PORT)
     device2 = Device(btctl.get_address(), BLUETOOTH_PORT2)
     direction = ""
-
+        
     monitor = Monitor()
     monitor.update_screen()
 
@@ -144,7 +146,8 @@ if __name__ == "__main__":
             # Process data
             print("Data from api: {}".format(data))
             direction, distance = process_data(data).split(b" ")
-            direction = direction.decode("utf-8")
+            # direction = direction.decode("utf-8")
+            direction = random.choice(["L", "R"]) # delete after
             distance = distance.decode("utf-8")
             monitor.set_direction(direction)
             monitor.set_distance(distance)

@@ -24,6 +24,10 @@ EXIT_POS = (260, 220)
 CENTER_POS = (160, 120)
 
 
+def quit_it(channel):
+    sys.exit(0)
+
+
 class Monitor:
 
     def __init__(self):
@@ -32,6 +36,9 @@ class Monitor:
         pygame.mouse.set_visible(not isOnTFT)
         self.direction = ""
         self.distance = 0
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(27, GPIO.FALLING, callback=quit_it)
 
       
     def set_direction(self, L_R):
